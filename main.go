@@ -3,6 +3,7 @@ package main
 /*
 	- nohup ./Shadi &
 	- chmod -R 777 ~/
+
 */
 
 import (
@@ -96,10 +97,10 @@ var Y Athan
 
 //Split API
 const (
-	API1 string = "http://api.aladhan.com/v1/timingsByCity?city="
-	API2 string = "&country="
-	API3 string = "&state="
-	API4 string = "&method="
+	MainAPI    string = "http://api.aladhan.com/v1/timingsByCity?city="
+	CountryAPI string = "&country="
+	StateAPI   string = "&state="
+	MethodAPI  string = "&method="
 )
 
 func main() {
@@ -117,8 +118,12 @@ func main() {
 		Hostname: config.Connection.IP,
 		Lang:     config.Settings.Language,
 		Accent:   config.Settings.Accent,
-		Port:     config.Connection.Port,
+		//Port:     config.Connection.Port,
 	})
+
+	if err != nil {
+		panic(err)
+	}
 
 	if err != nil {
 		panic(err)
@@ -135,7 +140,7 @@ func main() {
 
 	//Athan API Function
 	ACal := func() {
-		var AthanAPI = API1 + config.Location.City + API2 + config.Location.Country + API3 + config.Location.State + API4 + Meth
+		var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth
 		FormatAPI := fmt.Sprintf(AthanAPI)
 
 		resp, err := http.Get(FormatAPI)
@@ -145,10 +150,10 @@ func main() {
 
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
+		body, err := ioutil.ReadAll(resp.Body)
 
 		err = json.Unmarshal(body, &Y)
 		if err != nil {
@@ -183,50 +188,53 @@ func main() {
 				cli.Play(config.Audio.Athan)
 				time.Sleep(4 * time.Minute)
 			}
-			continue
-			//Checks if its time for Duhur
-		} else if Y.Data.Timings.D == CurrentTime {
+		}
+
+		//Checks if its time for Duhur
+		if Y.Data.Timings.D == CurrentTime {
 			if config.Prayers.Duhur == true {
 				cli.SetVolume(config.Volume.Duhur)
 				cli.Play(config.Audio.Athan)
 				time.Sleep(4 * time.Minute)
+			}
+		}
+		//Checks if the day is Friday
+		if config.Options.Recite == true {
+			if CurrentDay == "Friday" {
+				cli.Notify("I will begin reciting Quran.")
+				time.Sleep(5 * time.Second)
+				cli.Play(config.Audio.Recite)
+				time.Sleep(30 * time.Minute)
+			}
+		}
 
-			}
-			//Checks if the day is Friday
-			if config.Options.Recite == true {
-				if CurrentDay == "Friday" {
-					cli.Notify("I will begin reciting Quran.")
-					time.Sleep(5 * time.Second)
-					cli.Play(config.Audio.Recite)
-					time.Sleep(30 * time.Minute)
-				}
-			}
-			continue
-			//Checks if its time for Asr
-		} else if Y.Data.Timings.A == CurrentTime {
+		//Checks if its time for Asr
+		if Y.Data.Timings.A == CurrentTime {
 			if config.Prayers.Asr == true {
 				cli.SetVolume(config.Volume.Asr)
 				cli.Play(config.Audio.Athan)
 				time.Sleep(4 * time.Minute)
 			}
-			ACal()
-			continue
-			//Checks if its time for Magrib
-		} else if Y.Data.Timings.M == CurrentTime {
+		}
+
+		//Checks if its time for Magrib
+		if Y.Data.Timings.M == CurrentTime {
 			if config.Prayers.Magrib == true {
 				cli.SetVolume(config.Volume.Magrib)
 				cli.Play(config.Audio.Athan)
 				time.Sleep(4 * time.Minute)
 			}
-			continue
-			//Checks if time for Isha
-		} else if Y.Data.Timings.I == CurrentTime {
+		}
+
+		//Checks if time for Isha
+		if Y.Data.Timings.I == CurrentTime {
 			if config.Prayers.Isha == true {
 				cli.SetVolume(config.Volume.Isha)
 				cli.Play(config.Audio.Athan)
 				time.Sleep(4 * time.Minute)
+				ACal() //Recall Json Data
 			}
-			continue
+
 		}
 	} // End Loop
 
@@ -237,10 +245,10 @@ func LoadConfig(filename string) (Config, error) {
 	var config Config
 	configFile, err := os.Open(filename)
 
+	defer configFile.Close()
 	if err != nil {
 		return config, err
 	}
-	defer configFile.Close()
 
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(&config)
