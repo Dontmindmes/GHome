@@ -123,10 +123,6 @@ func main() {
 
 	if err != nil {
 		panic(err)
-	}
-
-	if err != nil {
-		panic(err)
 	} else {
 		// Sets to device to default volume
 		cli.SetVolume(config.Volume.Default)
@@ -142,6 +138,8 @@ func main() {
 	ACal := func() {
 		var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth
 		FormatAPI := fmt.Sprintf(AthanAPI)
+
+		fmt.Println(AthanAPI)
 
 		resp, err := http.Get(FormatAPI)
 		if err != nil {
