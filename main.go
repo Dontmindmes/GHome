@@ -122,10 +122,6 @@ func main() {
 
 	if err != nil {
 		panic(err)
-	}
-
-	if err != nil {
-		panic(err)
 	} else {
 		// Sets to device to default volume
 		cli.SetVolume(config.Volume.Default)
