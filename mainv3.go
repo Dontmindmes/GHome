@@ -93,9 +93,6 @@ type Config struct {
 	}
 }
 
-//Y Gets assigned from Athan
-//var Y Athan
-
 //Split API
 const (
 	MainAPI    string = "http://api.aladhan.com/v1/timingsByCity?city="
@@ -107,6 +104,7 @@ const (
 var Meth = strconv.Itoa(config.Calculation.Method)
 
 var config Config
+var entry string
 
 func LookupHomeIP() []*GoogleHomeInfo {
 	entriesCh := make(chan *mdns.ServiceEntry, 4)
@@ -114,7 +112,7 @@ func LookupHomeIP() []*GoogleHomeInfo {
 	results := []*GoogleHomeInfo{}
 	go func() {
 		for entry := range entriesCh {
-			//log.Printf("[INFO] ServiceEntry detected: [%s:%d]%s", entry.AddrV4, entry.Port, entry.Name)
+			log.Printf("[INFO] ServiceEntry detected: [%s:%d]%s", entry.AddrV4, entry.Port, entry.Name)
 			for _, field := range entry.InfoFields {
 				if strings.HasPrefix(field, googleHomeModelInfo) {
 					results = append(results, &GoogleHomeInfo{entry.AddrV4.String(), entry.Port})
@@ -129,6 +127,8 @@ func LookupHomeIP() []*GoogleHomeInfo {
 	return results
 }
 
+var cli *googlehome.Config
+
 func main() {
 
 	var err error
@@ -141,96 +141,97 @@ func main() {
 	fmt.Println("Connected")
 	//cli.Notify("test")
 	Y := ACal()
-	for range time.Tick(time.Second * 50) {
+	homes := LookupHomeIP()
 
-		homes := LookupHomeIP()
-
-		for _, home := range homes {
-			cli, err := googlehome.NewClientWithConfig(googlehome.Config{
-				Hostname: home.Ip,
-				Lang:     "en",
-				Accent:   "GB",
-			})
-
-			//cli.Notify("test")
-
-			//Get Local time test
-			t := time.Now()
-			location, err := time.LoadLocation(config.Location.TimeZone)
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			CurrentTime := fmt.Sprint(t.In(location).Format("15:04"))
-
-			//Check if friday
-			day := time.Now().Weekday()
-			CurrentDay := fmt.Sprint(day)
-
-			//Checks if its time for Fajir
-			if Y.Data.Timings.F == CurrentTime {
-				if config.Prayers.Fajir == true {
-					//fmt.Println("Time for Fajir")
-					cli.SetVolume(config.Volume.Fajir)
-					cli.Play(config.Audio.Athan)
-					time.Sleep(4 * time.Minute)
-				}
-			}
-
-			//Checks if its time for Duhur
-			if Y.Data.Timings.D == CurrentTime {
-				if config.Prayers.Duhur == true {
-					//fmt.Println("Time for Duhur")
-					cli.SetVolume(config.Volume.Duhur)
-					cli.Play(config.Audio.Athan)
-					time.Sleep(4 * time.Minute)
-				}
-			}
-
-			//Checks if the day is Friday
-			if config.Options.Recite == true {
-				if CurrentDay == "Friday" {
-					//cli.Notify("I will begin reciting Quran.")
-					time.Sleep(5 * time.Second)
-					cli.Play(config.Audio.Recite)
-					time.Sleep(30 * time.Minute)
-				}
-			}
-
-			//Checks if its time for Asr
-			if Y.Data.Timings.A == CurrentTime {
-				if config.Prayers.Asr == true {
-					//fmt.Println("Time for Asr")
-					cli.SetVolume(config.Volume.Asr)
-					cli.Play(config.Audio.Athan)
-					time.Sleep(4 * time.Minute)
-				}
-			}
-
-			//Checks if its time for Magrib
-			if Y.Data.Timings.M == CurrentTime {
-				if config.Prayers.Magrib == true {
-					//fmt.Println("Time for Magrib")
-					cli.SetVolume(config.Volume.Magrib)
-					cli.Play(config.Audio.Athan)
-					time.Sleep(4 * time.Minute)
-
-				}
-			}
-
-			//Checks if time for Isha
-			if Y.Data.Timings.I == CurrentTime {
-				if config.Prayers.Isha == true {
-					//fmt.Println("Time for Isha")
-					cli.SetVolume(config.Volume.Isha)
-					cli.Play(config.Audio.Athan)
-					time.Sleep(4 * time.Minute)
-					ACal() //Recall Json Data
-				}
-
-			}
-		} // End Loop
+	for _, home := range homes {
+		cli, err := googlehome.NewClientWithConfig(googlehome.Config{
+			Hostname: home.Ip,
+			Lang:     "ja",
+			Accent:   "GB",
+		})
+		if err != nil {
+			panic(err)
+		}
 	}
+
+	for range time.Tick(time.Second * 8) {
+		//Get Local time test
+		t := time.Now()
+		location, err := time.LoadLocation(config.Location.TimeZone)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		CurrentTime := fmt.Sprint(t.In(location).Format("15:04"))
+
+		//Check if friday
+		day := time.Now().Weekday()
+		CurrentDay := fmt.Sprint(day)
+
+		//cli.Notify("test")
+
+		//Checks if its time for Fajir
+		if Y.Data.Timings.F == CurrentTime {
+			if config.Prayers.Fajir == true {
+				//fmt.Println("Time for Fajir")
+				cli.SetVolume(config.Volume.Fajir)
+				cli.Play(config.Audio.Athan)
+			}
+		}
+
+		//Checks if its time for Duhur
+		if Y.Data.Timings.D == CurrentTime {
+			if config.Prayers.Duhur == true {
+				//fmt.Println("Time for Duhur")
+				cli.SetVolume(config.Volume.Duhur)
+				cli.Play(config.Audio.Athan)
+			}
+		}
+
+		//Checks if the day is Friday
+		if config.Options.Recite == true {
+			if CurrentDay == "Friday" {
+				//cli.Notify("I will begin reciting Quran.")
+				time.Sleep(5 * time.Second)
+				cli.Play(config.Audio.Recite)
+			}
+		}
+
+		if config.Prayers.Duhur == true {
+			cli.Play(config.Audio.Athan)
+			time.Sleep(4 * time.Minute)
+		}
+
+		//Checks if its time for Asr
+		if Y.Data.Timings.A == CurrentTime {
+			if config.Prayers.Asr == true {
+				//fmt.Println("Time for Asr")
+				cli.SetVolume(config.Volume.Asr)
+				cli.Play(config.Audio.Athan)
+			}
+		}
+
+		//Checks if its time for Magrib
+		if Y.Data.Timings.M == CurrentTime {
+			if config.Prayers.Magrib == true {
+				//fmt.Println("Time for Magrib")
+				cli.SetVolume(config.Volume.Magrib)
+				cli.Play(config.Audio.Athan)
+
+			}
+		}
+
+		//Checks if time for Isha
+		if Y.Data.Timings.I == CurrentTime {
+			if config.Prayers.Isha == true {
+				//fmt.Println("Time for Isha")
+				cli.SetVolume(config.Volume.Isha)
+				cli.Play(config.Audio.Athan)
+				ACal() //Recall Json Data
+			}
+
+		}
+	} // End Loop
 
 }
 
