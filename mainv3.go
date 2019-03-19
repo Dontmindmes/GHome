@@ -1,5 +1,11 @@
 package main
 
+/*
+	- nohup ./Shadi &
+	- chmod -R 777 ~/
+
+*/
+
 import (
 	"encoding/json"
 	"fmt"
@@ -8,22 +14,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/kaneta1992/google-home-client-go/googlehome"
-	"github.com/micro/mdns"
+	"github.com/evalphobia/google-home-client-go/googlehome"
 )
-
-const (
-	googleCastServiceName = "_googlecast._tcp"
-	googleHomeModelInfo   = "md=Google Home"
-)
-
-type GoogleHomeInfo struct {
-	Ip   string
-	Port int
-}
 
 //Athan grabs main data header from Json
 type Athan struct {
@@ -51,6 +45,11 @@ type Config struct {
 		Language string `json:"Language"`
 		Accent   string `json:"Accent"`
 		Athan    string `json:"Athan"`
+	}
+
+	Connection struct {
+		IP   string `json:"IP"`
+		Port int    `json:"Port"`
 	}
 
 	Prayers struct {
@@ -93,6 +92,9 @@ type Config struct {
 	}
 }
 
+//Y Gets assigned from Athan
+//var Y Athan
+
 //Split API
 const (
 	MainAPI    string = "http://api.aladhan.com/v1/timingsByCity?city="
@@ -104,30 +106,6 @@ const (
 var Meth = strconv.Itoa(config.Calculation.Method)
 
 var config Config
-var entry string
-
-func LookupHomeIP() []*GoogleHomeInfo {
-	entriesCh := make(chan *mdns.ServiceEntry, 4)
-
-	results := []*GoogleHomeInfo{}
-	go func() {
-		for entry := range entriesCh {
-			log.Printf("[INFO] ServiceEntry detected: [%s:%d]%s", entry.AddrV4, entry.Port, entry.Name)
-			for _, field := range entry.InfoFields {
-				if strings.HasPrefix(field, googleHomeModelInfo) {
-					results = append(results, &GoogleHomeInfo{entry.AddrV4.String(), entry.Port})
-				}
-			}
-		}
-	}()
-
-	mdns.Lookup(googleCastServiceName, entriesCh)
-	close(entriesCh)
-
-	return results
-}
-
-//var cli *googlehome.Config
 
 func main() {
 
@@ -138,25 +116,35 @@ func main() {
 		log.Fatal("Error importing config.json file", err)
 	}
 
-	fmt.Println("Connected")
-	//cli.Notify("test")
-	Y := ACal()
-	homes := LookupHomeIP()
+	//Connect to Google Home
+	cli, err := googlehome.NewClientWithConfig(googlehome.Config{
+		Hostname: config.Connection.IP,
+		Lang:     config.Settings.Language,
+		Accent:   config.Settings.Accent,
+		Port:     42038,
+	})
 
-	var cli *googlehome.Config
+	if err != nil {
+		panic(err)
+	} else {
+		// Sets to device to default volume
+		cli.SetVolume(config.Volume.Default)
 
-	for _, home := range homes {
-		cli, err := googlehome.NewClientWithConfig(googlehome.Config{
-			Hostname: home.Ip,
-			Lang:     "ja",
-			Accent:   "GB",
-		})
-		if err != nil {
-			panic(err)
+		//Echos to device to tell if users its Connected
+		if config.Volume.Connection == true {
+			cli.Notify("Successfully Connected.")
+			//cli.Play(config.Audio.Athan)
 		}
+		ConnectedTo()
 	}
 
-	for range time.Tick(time.Second * 8) {
+	//Call Athan API
+	Y := ACal()
+
+	for range time.Tick(time.Second * 25) {
+		//Grab Updated Config Files
+		config, _ := LoadConfig("config.json")
+
 		//Get Local time test
 		t := time.Now()
 		location, err := time.LoadLocation(config.Location.TimeZone)
@@ -170,14 +158,13 @@ func main() {
 		day := time.Now().Weekday()
 		CurrentDay := fmt.Sprint(day)
 
-		//cli.Notify("test")
-
 		//Checks if its time for Fajir
 		if Y.Data.Timings.F == CurrentTime {
 			if config.Prayers.Fajir == true {
 				//fmt.Println("Time for Fajir")
 				cli.SetVolume(config.Volume.Fajir)
 				cli.Play(config.Audio.Athan)
+				time.Sleep(4 * time.Minute)
 			}
 		}
 
@@ -187,7 +174,15 @@ func main() {
 				//fmt.Println("Time for Duhur")
 				cli.SetVolume(config.Volume.Duhur)
 				cli.Play(config.Audio.Athan)
+				time.Sleep(4 * time.Minute)
 			}
+		}
+
+		if config.Prayers.Duhur == true {
+			//fmt.Println("Time for Duhur")
+			cli.SetVolume(config.Volume.Duhur)
+			cli.Play(config.Audio.Athan)
+			time.Sleep(4 * time.Minute)
 		}
 
 		//Checks if the day is Friday
@@ -196,12 +191,8 @@ func main() {
 				//cli.Notify("I will begin reciting Quran.")
 				time.Sleep(5 * time.Second)
 				cli.Play(config.Audio.Recite)
+				time.Sleep(30 * time.Minute)
 			}
-		}
-
-		if config.Prayers.Duhur == true {
-			cli.Play(config.Audio.Athan)
-			time.Sleep(4 * time.Minute)
 		}
 
 		//Checks if its time for Asr
@@ -210,6 +201,7 @@ func main() {
 				//fmt.Println("Time for Asr")
 				cli.SetVolume(config.Volume.Asr)
 				cli.Play(config.Audio.Athan)
+				time.Sleep(4 * time.Minute)
 			}
 		}
 
@@ -219,6 +211,7 @@ func main() {
 				//fmt.Println("Time for Magrib")
 				cli.SetVolume(config.Volume.Magrib)
 				cli.Play(config.Audio.Athan)
+				time.Sleep(4 * time.Minute)
 
 			}
 		}
@@ -229,27 +222,13 @@ func main() {
 				//fmt.Println("Time for Isha")
 				cli.SetVolume(config.Volume.Isha)
 				cli.Play(config.Audio.Athan)
+				time.Sleep(4 * time.Minute)
 				ACal() //Recall Json Data
 			}
 
 		}
 	} // End Loop
 
-}
-
-//LoadConfig file
-func LoadConfig(filename string) (Config, error) {
-	var config Config
-	configFile, err := os.Open(filename)
-
-	defer configFile.Close()
-	if err != nil {
-		return config, err
-	}
-
-	jsonParser := json.NewDecoder(configFile)
-	err = jsonParser.Decode(&config)
-	return config, err
 }
 
 //ACal API Function
@@ -280,12 +259,28 @@ func ACal() Athan {
 	return Y
 }
 
+//LoadConfig file
+func LoadConfig(filename string) (Config, error) {
+	var config Config
+	configFile, err := os.Open(filename)
+
+	defer configFile.Close()
+	if err != nil {
+		return config, err
+	}
+
+	jsonParser := json.NewDecoder(configFile)
+	err = jsonParser.Decode(&config)
+	return config, err
+}
+
 //ConnectedTo gives information of connected google home and its basic paramaters
 func ConnectedTo() {
 	config, _ := LoadConfig("config.json")
 
 	fmt.Println("Device Connected:", time.Now())
 	fmt.Println("Connected to Device:", config.Settings.Name)
+	fmt.Println("IP Address:", config.Connection.IP)
 	fmt.Println("Using Lanuage:", config.Settings.Language)
 	fmt.Println("Using Accent:", config.Settings.Accent)
 	fmt.Println("Default Volume Set at", config.Volume.Default)
