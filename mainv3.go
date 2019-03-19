@@ -243,7 +243,10 @@ func LookupHomeIP() []*GoogleHomeInfo {
 	fmt.Println("Make sure your config file patchs Google-Cast-Group IP and Port for Synced BroadCast")
 	go func() {
 		for entry := range entriesCh {
-			log.Printf("[INFO] ServiceEntry detected: [%s:%d]%s", entry.AddrV4, entry.Port, entry.Name)
+			if strings.Contains(entry.Name, "Cast") {
+				log.Printf("[INFO] ServiceEntry detected: [%s:%d]%s", entry.AddrV4, entry.Port, entry.Name)
+			}
+			//log.Printf("[INFO] ServiceEntry detected: [%s:%d]%s", entry.AddrV4, entry.Port, entry.Name)
 			for _, field := range entry.InfoFields {
 				if strings.HasPrefix(field, googleHomeModelInfo) {
 					results = append(results, &GoogleHomeInfo{entry.AddrV4.String(), entry.Port})
