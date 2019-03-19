@@ -3,6 +3,8 @@ package main
 /*
 	- nohup ./Shadi &
 	- chmod -R 777 ~/
+	
+	- Place the Cast IP and Port in the config.json
 
 */
 
