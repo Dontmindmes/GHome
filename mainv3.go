@@ -14,9 +14,11 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/evalphobia/google-home-client-go/googlehome"
+	"github.com/micro/mdns"
 )
 
 //Athan grabs main data header from Json
@@ -92,6 +94,16 @@ type Config struct {
 	}
 }
 
+const (
+	googleCastServiceName = "_googlecast._tcp"
+	googleHomeModelInfo   = "md=Google Home"
+)
+
+type GoogleHomeInfo struct {
+	Ip   string
+	Port int
+}
+
 //Y Gets assigned from Athan
 //var Y Athan
 
@@ -108,7 +120,7 @@ var Meth = strconv.Itoa(config.Calculation.Method)
 var config Config
 
 func main() {
-
+	LookupHomeIP()
 	var err error
 	//Connect to Json file for settings and paramaters
 	config, err = LoadConfig("config.json")
@@ -121,7 +133,7 @@ func main() {
 		Hostname: config.Connection.IP,
 		Lang:     config.Settings.Language,
 		Accent:   config.Settings.Accent,
-		Port:     42038,
+		Port:     config.Connection.Port,
 	})
 
 	if err != nil {
@@ -178,13 +190,6 @@ func main() {
 			}
 		}
 
-		if config.Prayers.Duhur == true {
-			//fmt.Println("Time for Duhur")
-			cli.SetVolume(config.Volume.Duhur)
-			cli.Play(config.Audio.Athan)
-			time.Sleep(4 * time.Minute)
-		}
-
 		//Checks if the day is Friday
 		if config.Options.Recite == true {
 			if CurrentDay == "Friday" {
@@ -229,6 +234,28 @@ func main() {
 		}
 	} // End Loop
 
+}
+
+func LookupHomeIP() []*GoogleHomeInfo {
+	entriesCh := make(chan *mdns.ServiceEntry, 2)
+
+	results := []*GoogleHomeInfo{}
+	fmt.Println("Make sure your config file patchs Google-Cast-Group IP and Port for Synced BroadCast")
+	go func() {
+		for entry := range entriesCh {
+			log.Printf("[INFO] ServiceEntry detected: [%s:%d]%s", entry.AddrV4, entry.Port, entry.Name)
+			for _, field := range entry.InfoFields {
+				if strings.HasPrefix(field, googleHomeModelInfo) {
+					results = append(results, &GoogleHomeInfo{entry.AddrV4.String(), entry.Port})
+				}
+			}
+		}
+	}()
+
+	mdns.Lookup(googleCastServiceName, entriesCh)
+	close(entriesCh)
+
+	return results
 }
 
 //ACal API Function
