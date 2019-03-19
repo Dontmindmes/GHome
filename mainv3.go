@@ -127,7 +127,7 @@ func LookupHomeIP() []*GoogleHomeInfo {
 	return results
 }
 
-var cli *googlehome.Config
+//var cli *googlehome.Config
 
 func main() {
 
@@ -142,6 +142,8 @@ func main() {
 	//cli.Notify("test")
 	Y := ACal()
 	homes := LookupHomeIP()
+
+	var cli *googlehome.Config
 
 	for _, home := range homes {
 		cli, err := googlehome.NewClientWithConfig(googlehome.Config{
