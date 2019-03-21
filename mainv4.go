@@ -3,7 +3,8 @@ package main
 /*
 	- nohup ./Shadi &
 	- chmod -R 777 ~/
-
+	
+	- Must be on same network as the google homes (same network name)
 */
 
 import (
@@ -130,7 +131,7 @@ func main() {
 
 	//Connect to Google Home
 	cli, err := googlehome.NewClientWithConfig(googlehome.Config{
-		Hostname: config.Connection.IP,
+		Hostname: CIP,
 		Lang:     config.Settings.Language,
 		Accent:   config.Settings.Accent,
 		Port:     CPort,
@@ -153,7 +154,7 @@ func main() {
 	//Call Athan API
 	Y := ACal()
 
-	for range time.Tick(time.Second * 25) {
+	for range time.Tick(time.Second * 15) {
 		//Grab Updated Config Files
 		config, _ := LoadConfig("config.json")
 
@@ -248,7 +249,7 @@ func LookupHomeIP() []*GoogleHomeInfo {
 				fmt.Printf("[INFO] ServiceEntry Group Cast detected: [%s:%d]", entry.AddrV4, entry.Port)
 				fmt.Println(" ")
 				CPort = entry.Port
-				CIP = entry.AddrV4.String()
+				CIP = fmt.Sprintf(entry.AddrV4.String())
 			}
 			for _, field := range entry.InfoFields {
 				if strings.HasPrefix(field, googleHomeModelInfo) {
@@ -363,4 +364,24 @@ func MethodV() {
 	default:
 		fmt.Println("Other option choosen")
 	}
+}
+
+func Checks() {
+	file, _ := os.Create("Status.txt")
+
+	s, err := file.WriteString("ON")
+	if err != nil {
+		fmt.Println(s, err)
+	}
+	defer file.Close()
+}
+
+func Check() {
+	file, _ := os.Create("Status.txt")
+
+	s, err := file.WriteString("OFF")
+	if err != nil {
+		fmt.Println(s, err)
+	}
+	defer file.Close()
 }
