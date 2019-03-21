@@ -3,8 +3,6 @@ package main
 /*
 	- nohup ./Shadi &
 	- chmod -R 777 ~/
-  
-  - This version auto connects to any cast device 
 
 */
 
@@ -13,13 +11,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/evalphobia/google-home-client-go/googlehome"
+	"github.com/gojektech/heimdall/httpclient"
 	"github.com/micro/mdns"
 )
 
@@ -50,7 +48,7 @@ type Config struct {
 		Accent   string `json:"Accent"`
 		Athan    string `json:"Athan"`
 	}
-
+	//Unused code, keep dont remove
 	Connection struct {
 		IP   string `json:"IP"`
 		Port int    `json:"Port"`
@@ -102,15 +100,12 @@ const (
 )
 
 type GoogleHomeInfo struct {
-	Ip   string
+	IP   string
 	Port int
 }
 
 var CPort int
 var CIP string
-
-//Y Gets assigned from Athan
-//var Y Athan
 
 //Split API
 const (
@@ -274,11 +269,14 @@ func ACal() Athan {
 	var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth
 	FormatAPI := fmt.Sprintf(AthanAPI)
 
-	//fmt.Println(AthanAPI)
+	// Create a new HTTP client with a default timeout
+	timeout := 1000 * time.Millisecond
+	client := httpclient.NewClient(httpclient.WithHTTPTimeout(timeout))
 
-	resp, err := http.Get(FormatAPI)
+	// Use the clients GET method to create and execute the request
+	resp, err := client.Get(FormatAPI, nil)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	defer resp.Body.Close()
@@ -333,33 +331,35 @@ func ConnectedTo() {
 func MethodV() {
 	config, _ := LoadConfig("config.json")
 
+	var Using string = "Using Calculation Method: "
+
 	switch config.Calculation.Method {
 	case 0:
 		//fmt.Println("Using Calculation Method: Shia Ithna-Ansari")
 	case 1:
-		fmt.Println("Using Calculation Method: University of Islamic Sciences, Karachi")
+		fmt.Println(Using + " University of Islamic Sciences, Karachi")
 	case 2:
-		fmt.Println("Using Calculation Method: Islamic Society of North America")
+		fmt.Println(Using + " Islamic Society of North America")
 	case 3:
-		fmt.Println("Using Calculation Method: Muslim World League")
+		fmt.Println(Using + " Muslim World League")
 	case 4:
-		fmt.Println("Using Calculation Method: Umm Al-Qura University, Makkah")
+		fmt.Println(Using + " Umm Al-Qura University, Makkah")
 	case 5:
-		fmt.Println("Using Calculation Method: Egyptian General Authority of Survey")
+		fmt.Println(Using + " Egyptian General Authority of Survey")
 	case 7:
-		fmt.Println("Using Calculation Method: Institute of Geophysics, University of Tehran")
+		fmt.Println(Using + " Institute of Geophysics, University of Tehran")
 	case 8:
-		fmt.Println("Using Calculation Method: Gulf Region")
+		fmt.Println(Using + " Gulf Region")
 	case 9:
-		fmt.Println("Using Calculation Method: Kuwait")
+		fmt.Println(Using + " Kuwait")
 	case 10:
-		fmt.Println("Using Calculation Method: Qatar")
+		fmt.Println(Using + " Qatar")
 	case 11:
-		fmt.Println("Using Calculation Method: Majlis Ugama Islam Singapura, Singapore")
+		fmt.Println(Using + " Majlis Ugama Islam Singapura, Singapore")
 	case 12:
-		fmt.Println("Using Calculation Method: Union Organization islamic de France")
+		fmt.Println(Using + " Union Organization islamic de France")
 	case 13:
-		fmt.Println("Using Calculation Method: Diyanet İşleri Başkanlığı, Turkey")
+		fmt.Println(Using + " Diyanet İşleri Başkanlığı, Turkey")
 	default:
 		fmt.Println("Other option choosen")
 	}
