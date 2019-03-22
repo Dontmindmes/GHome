@@ -155,13 +155,6 @@ func main() {
 	//Call Athan API
 	Y := ACal()
 
-	fmt.Println("=========================================")
-	fmt.Println("Fajir:" + Y.Data.Timings.F)
-	fmt.Println("Duhur:" + Y.Data.Timings.D)
-	fmt.Println("Asr:" + Y.Data.Timings.A)
-	fmt.Println("Magrib:" + Y.Data.Timings.M)
-	fmt.Println("Isha:" + Y.Data.Timings.I)
-
 	for range time.Tick(time.Second * 15) {
 		//Grab Updated Config Files
 		config, _ := LoadConfig("config.json")
@@ -278,7 +271,6 @@ func ACal() Athan {
 	var Meth = strconv.Itoa(config.Calculation.Method)
 	var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth
 	FormatAPI := fmt.Sprintf(AthanAPI)
-	fmt.Println(FormatAPI)
 
 	// Create a new HTTP client with a default timeout
 	timeout := 1000 * time.Millisecond
