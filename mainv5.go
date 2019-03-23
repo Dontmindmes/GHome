@@ -155,7 +155,7 @@ func main() {
 	//Call Athan API
 	Y := ACal()
 
-	for range time.Tick(time.Second * 15) {
+	for range time.Tick(time.Second * 10) {
 		//Grab Updated Config Files
 		config, _ := LoadConfig("config.json")
 
@@ -386,6 +386,7 @@ func Checks() {
 }
 
 func Check() {
+
 	file, _ := os.Create("Status.txt")
 
 	s, err := file.WriteString("OFF")
