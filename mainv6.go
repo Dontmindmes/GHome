@@ -173,15 +173,10 @@ func main() {
 		CurrentDay := fmt.Sprint(day)
 
 		//Beta Pre Salat Alert
-		Pasr := Y.Data.Timings.I
-
-		pa, _ := time.Parse("15:04", Pasr)
+		//Pasr := Y.Data.Timings.I
+		pa, _ := time.Parse("15:04", Y.Data.Timings.I)
 		pa = pa.Add(time.Minute * time.Duration(-15))
-		ps := fmt.Sprintf(t.Format("15:04"))
-
-		fmt.Println("Minus time " + ps)
-		fmt.Println("Isha time " + Y.Data.Timings.I)
-		fmt.Println("Current time " + CurrentTime)
+		ps := fmt.Sprintf(pa.Format("15:04"))
 
 		//Checks if its time for Fajir
 		if Y.Data.Timings.F == CurrentTime {
