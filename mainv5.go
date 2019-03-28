@@ -49,11 +49,6 @@ type Config struct {
 		Accent   string `json:"Accent"`
 		Athan    string `json:"Athan"`
 	}
-	//Unused code, keep dont remove
-	Connection struct {
-		IP   string `json:"IP"`
-		Port int    `json:"Port"`
-	}
 
 	Prayers struct {
 		Fajir  bool `json:"Fajir"`
@@ -65,6 +60,7 @@ type Config struct {
 
 	Audio struct {
 		Athan  string `json:"Athan"`
+		Fajir  string `json:"Fajir"`
 		Recite string `json:"Recite"`
 	}
 
@@ -80,18 +76,18 @@ type Config struct {
 	}
 
 	Volume struct {
-		Connection bool    `json:"Connection"`
-		Default    float64 `json:"Default"`
-		Fajir      float64 `json:"Fajir"`
-		Duhur      float64 `json:"Duhur"`
-		Asr        float64 `json:"Asr"`
-		Magrib     float64 `json:"Magrib"`
-		Isha       float64 `json:"Isha"`
+		Default float64 `json:"Default"`
+		Fajir   float64 `json:"Fajir"`
+		Duhur   float64 `json:"Duhur"`
+		Asr     float64 `json:"Asr"`
+		Magrib  float64 `json:"Magrib"`
+		Isha    float64 `json:"Isha"`
 	}
 
 	Options struct {
-		Whisper bool `json:"Whisper"`
-		Recite  bool `json:"Recite"`
+		Recite     bool `json:"Recite"`
+		Alert      bool `json:"Alert"`
+		Connection bool `json:"Connection"`
 	}
 }
 
@@ -120,7 +116,6 @@ var config Config
 var cli *googlehome.Config
 
 func main() {
-
 	LookupHomeIP()
 	var err error
 	//Connect to Json file for settings and paramaters
@@ -146,7 +141,7 @@ func main() {
 		Checks()
 		cli.SetVolume(config.Volume.Default)
 		//Echos to device to tell if users its Connected
-		if config.Volume.Connection == true {
+		if config.Options.Connection == true {
 			cli.Notify("Successfully Connected.")
 		}
 		ConnectedTo()
@@ -155,7 +150,7 @@ func main() {
 	//Call Athan API
 	Y := ACal()
 
-	for range time.Tick(time.Second * 10) {
+	for range time.Tick(time.Second * 15) {
 		//Grab Updated Config Files
 		config, _ := LoadConfig("config.json")
 
@@ -165,20 +160,49 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-
 		CurrentTime := fmt.Sprint(t.In(location).Format("15:04"))
 
 		//Check if friday
 		day := time.Now().Weekday()
 		CurrentDay := fmt.Sprint(day)
 
+		//Beta Pre Salat Alert
+
+		//Duhur
+		pd, _ := time.Parse("15:04", Y.Data.Timings.D)
+		pd = pd.Add(time.Minute * time.Duration(-15))
+		pds := fmt.Sprintf(pd.Format("15:04"))
+
+		//Asr
+		pa, _ := time.Parse("15:04", Y.Data.Timings.A)
+		pa = pa.Add(time.Minute * time.Duration(-15))
+		pas := fmt.Sprintf(pa.Format("15:04"))
+
+		//Magrib
+		pm, _ := time.Parse("15:04", Y.Data.Timings.M)
+		pm = pm.Add(time.Minute * time.Duration(-15))
+		pam := fmt.Sprintf(pm.Format("15:04"))
+
+		//Isha
+		pi, _ := time.Parse("15:04", Y.Data.Timings.I)
+		pi = pi.Add(time.Minute * time.Duration(-15))
+		pai := fmt.Sprintf(pi.Format("15:04"))
+
 		//Checks if its time for Fajir
 		if Y.Data.Timings.F == CurrentTime {
 			if config.Prayers.Fajir == true {
 				//fmt.Println("Time for Fajir")
 				cli.SetVolume(config.Volume.Fajir)
-				cli.Play(config.Audio.Athan)
+				cli.Play(config.Audio.Fajir)
 				time.Sleep(4 * time.Minute)
+			}
+		}
+
+		if config.Options.Alert == true {
+			if pds == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
 			}
 		}
 
@@ -202,6 +226,14 @@ func main() {
 			}
 		}
 
+		if config.Options.Alert == true {
+			if pas == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
+			}
+		}
+
 		//Checks if its time for Asr
 		if Y.Data.Timings.A == CurrentTime {
 			if config.Prayers.Asr == true {
@@ -209,6 +241,14 @@ func main() {
 				cli.SetVolume(config.Volume.Asr)
 				cli.Play(config.Audio.Athan)
 				time.Sleep(4 * time.Minute)
+			}
+		}
+
+		if config.Options.Alert == true {
+			if pam == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
 			}
 		}
 
@@ -220,6 +260,14 @@ func main() {
 				cli.Play(config.Audio.Athan)
 				time.Sleep(4 * time.Minute)
 
+			}
+		}
+
+		if config.Options.Alert == true {
+			if pai == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
 			}
 		}
 
@@ -241,9 +289,8 @@ func main() {
 func LookupHomeIP() []*GoogleHomeInfo {
 
 	entriesCh := make(chan *mdns.ServiceEntry, 2)
-
 	results := []*GoogleHomeInfo{}
-	fmt.Println("Make sure your config file matchs Google-Cast-Group IP and Port for Synced BroadCast")
+
 	go func() {
 		for entry := range entriesCh {
 			if strings.Contains(entry.Name, "Cast") {
@@ -273,7 +320,7 @@ func ACal() Athan {
 	FormatAPI := fmt.Sprintf(AthanAPI)
 
 	// Create a new HTTP client with a default timeout
-	timeout := 1000 * time.Millisecond
+	timeout := 3000 * time.Millisecond
 	client := httpclient.NewClient(httpclient.WithHTTPTimeout(timeout))
 
 	// Use the clients GET method to create and execute the request
@@ -364,6 +411,8 @@ func MethodV() {
 		fmt.Println(Using + " Union Organization islamic de France")
 	case 13:
 		fmt.Println(Using + " Diyanet İşleri Başkanlığı, Turkey")
+	case 14:
+		fmt.Println(Using + " Spiritual Administration of Muslims of Russia")
 	default:
 		fmt.Println("Other option choosen")
 	}
