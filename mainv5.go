@@ -198,11 +198,13 @@ func main() {
 			}
 		}
 
-		if config.Options.Alert == true {
-			if pds == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
+		if config.Prayers.Duhur == true {
+			if config.Options.Alert == true {
+				if pds == CurrentTime {
+					cli.SetVolume(config.Volume.Default)
+					cli.Notify(" ")
+					time.Sleep(15 * time.Second)
+				}
 			}
 		}
 
@@ -226,11 +228,13 @@ func main() {
 			}
 		}
 
-		if config.Options.Alert == true {
-			if pas == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
+		if config.Prayers.Asr == true {
+			if config.Options.Alert == true {
+				if pas == CurrentTime {
+					cli.SetVolume(config.Volume.Default)
+					cli.Notify(" ")
+					time.Sleep(15 * time.Second)
+				}
 			}
 		}
 
@@ -244,11 +248,13 @@ func main() {
 			}
 		}
 
-		if config.Options.Alert == true {
-			if pam == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
+		if config.Prayers.Magrib == true {
+			if config.Options.Alert == true {
+				if pam == CurrentTime {
+					cli.SetVolume(config.Volume.Default)
+					cli.Notify(" ")
+					time.Sleep(15 * time.Second)
+				}
 			}
 		}
 
@@ -263,11 +269,13 @@ func main() {
 			}
 		}
 
-		if config.Options.Alert == true {
-			if pai == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
+		if config.Prayers.Isha == true {
+			if config.Options.Alert == true {
+				if pai == CurrentTime {
+					cli.SetVolume(config.Volume.Default)
+					cli.Notify(" ")
+					time.Sleep(15 * time.Second)
+				}
 			}
 		}
 
