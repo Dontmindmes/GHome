@@ -5,6 +5,7 @@ package main
 	- chmod -R 777 ~/
 
 	- Must be on same network as the google homes (same network name)
+	POSSIBLY ADD TUNE FUNCTION
 */
 
 import (
@@ -72,7 +73,8 @@ type Config struct {
 	}
 
 	Calculation struct {
-		Method int `json:"Method"`
+		Method int    `json:"Method"`
+		School string `json:"School"`
 	}
 
 	Volume struct {
@@ -110,6 +112,7 @@ const (
 	CountryAPI string = "&country="
 	StateAPI   string = "&state="
 	MethodAPI  string = "&method="
+	SchoolAPI  string = "&school="
 )
 
 var config Config
@@ -294,6 +297,7 @@ func main() {
 
 }
 
+//LookupHomeIP Scans internet for Google Cast System
 func LookupHomeIP() []*GoogleHomeInfo {
 
 	entriesCh := make(chan *mdns.ServiceEntry, 2)
@@ -324,7 +328,9 @@ func LookupHomeIP() []*GoogleHomeInfo {
 //ACal API Function
 func ACal() Athan {
 	var Meth = strconv.Itoa(config.Calculation.Method)
-	var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth
+	var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth + SchoolAPI + config.Calculation.School
+
+	//var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth + SchoolAPI + config.Calculation.School
 	FormatAPI := fmt.Sprintf(AthanAPI)
 
 	// Create a new HTTP client with a default timeout
