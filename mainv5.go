@@ -5,6 +5,9 @@ package main
 	- chmod -R 777 ~/
 
 	- Must be on same network as the google homes (same network name)
+
+
+	ADD SCHOOL CORRECTION METHOD AND OPTION
 	POSSIBLY ADD TUNE FUNCTION
 */
 
@@ -124,8 +127,8 @@ func main() {
 	//Connect to Json file for settings and paramaters
 	config, err = LoadConfig("config.json")
 	if err != nil {
-		log.Fatal("Error importing config.json file", err)
 		defer Check()
+		log.Fatal("Error importing config.json file", err)
 	}
 
 	//Connect to Google Home
@@ -192,15 +195,13 @@ func main() {
 		pai := fmt.Sprintf(pi.Format("15:04"))
 
 		//Checks if its time for Fajir
-		if Y.Data.Timings.F == CurrentTime {
-			if config.Prayers.Fajir == true {
-				//fmt.Println("Time for Fajir")
-				cli.SetVolume(config.Volume.Fajir)
-				cli.Play(config.Audio.Fajir)
-				time.Sleep(4 * time.Minute)
-			}
+		if Y.Data.Timings.F == CurrentTime && config.Options.Alert {
+			cli.SetVolume(config.Volume.Fajir)
+			cli.Play(config.Audio.Fajir)
+			time.Sleep(4 * time.Minute)
 		}
 
+		//PreAlert for Duhur
 		if config.Prayers.Duhur == true {
 			if config.Options.Alert == true {
 				if pds == CurrentTime {
@@ -212,13 +213,10 @@ func main() {
 		}
 
 		//Checks if its time for Duhur
-		if Y.Data.Timings.D == CurrentTime {
-			if config.Prayers.Duhur == true {
-				//fmt.Println("Time for Duhur")
-				cli.SetVolume(config.Volume.Duhur)
-				cli.Play(config.Audio.Athan)
-				time.Sleep(4 * time.Minute)
-			}
+		if Y.Data.Timings.D == CurrentTime && config.Prayers.Duhur {
+			cli.SetVolume(config.Volume.Duhur)
+			cli.Play(config.Audio.Athan)
+			time.Sleep(4 * time.Minute)
 		}
 
 		//Checks if the day is Friday
@@ -231,6 +229,7 @@ func main() {
 			}
 		}
 
+		//PreAlert for Asr
 		if config.Prayers.Asr == true {
 			if config.Options.Alert == true {
 				if pas == CurrentTime {
@@ -242,15 +241,13 @@ func main() {
 		}
 
 		//Checks if its time for Asr
-		if Y.Data.Timings.A == CurrentTime {
-			if config.Prayers.Asr == true {
-				//fmt.Println("Time for Asr")
-				cli.SetVolume(config.Volume.Asr)
-				cli.Play(config.Audio.Athan)
-				time.Sleep(4 * time.Minute)
-			}
+		if Y.Data.Timings.A == CurrentTime && config.Prayers.Asr {
+			cli.SetVolume(config.Volume.Asr)
+			cli.Play(config.Audio.Athan)
+			time.Sleep(4 * time.Minute)
 		}
 
+		//PreAlert for Magrib
 		if config.Prayers.Magrib == true {
 			if config.Options.Alert == true {
 				if pam == CurrentTime {
@@ -262,16 +259,13 @@ func main() {
 		}
 
 		//Checks if its time for Magrib
-		if Y.Data.Timings.M == CurrentTime {
-			if config.Prayers.Magrib == true {
-				//fmt.Println("Time for Magrib")
-				cli.SetVolume(config.Volume.Magrib)
-				cli.Play(config.Audio.Athan)
-				time.Sleep(4 * time.Minute)
-
-			}
+		if Y.Data.Timings.M == CurrentTime && config.Prayers.Magrib {
+			cli.SetVolume(config.Volume.Magrib)
+			cli.Play(config.Audio.Athan)
+			time.Sleep(4 * time.Minute)
 		}
 
+		//PreAlert for Isha
 		if config.Prayers.Isha == true {
 			if config.Options.Alert == true {
 				if pai == CurrentTime {
@@ -283,15 +277,11 @@ func main() {
 		}
 
 		//Checks if time for Isha
-		if Y.Data.Timings.I == CurrentTime {
-			if config.Prayers.Isha == true {
-				//fmt.Println("Time for Isha")
-				cli.SetVolume(config.Volume.Isha)
-				cli.Play(config.Audio.Athan)
-				time.Sleep(4 * time.Minute)
-				ACal() //Recall Json Data
-			}
-
+		if Y.Data.Timings.I == CurrentTime && config.Prayers.Isha {
+			cli.SetVolume(config.Volume.Isha)
+			cli.Play(config.Audio.Athan)
+			time.Sleep(4 * time.Minute)
+			ACal() //Recall Json Data
 		}
 	} // End Loop
 
