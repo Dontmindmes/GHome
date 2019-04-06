@@ -4,10 +4,6 @@ package main
 	- nohup ./Shadi &
 	- chmod -R 777 ~/
 
-	- Must be on same network as the google homes (same network name)
-
-
-	ADD SCHOOL CORRECTION METHOD AND OPTION
 	POSSIBLY ADD TUNE FUNCTION
 */
 
@@ -202,13 +198,11 @@ func main() {
 		}
 
 		//PreAlert for Duhur
-		if config.Prayers.Duhur == true {
-			if config.Options.Alert == true {
-				if pds == CurrentTime {
-					cli.SetVolume(config.Volume.Default)
-					cli.Notify(" ")
-					time.Sleep(15 * time.Second)
-				}
+		if config.Prayers.Duhur && config.Options.Alert {
+			if pds == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
 			}
 		}
 
@@ -230,13 +224,11 @@ func main() {
 		}
 
 		//PreAlert for Asr
-		if config.Prayers.Asr == true {
-			if config.Options.Alert == true {
-				if pas == CurrentTime {
-					cli.SetVolume(config.Volume.Default)
-					cli.Notify(" ")
-					time.Sleep(15 * time.Second)
-				}
+		if config.Prayers.Asr && config.Options.Alert {
+			if pas == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
 			}
 		}
 
@@ -248,13 +240,11 @@ func main() {
 		}
 
 		//PreAlert for Magrib
-		if config.Prayers.Magrib == true {
-			if config.Options.Alert == true {
-				if pam == CurrentTime {
-					cli.SetVolume(config.Volume.Default)
-					cli.Notify(" ")
-					time.Sleep(15 * time.Second)
-				}
+		if config.Prayers.Magrib && config.Options.Alert {
+			if pam == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
 			}
 		}
 
@@ -266,13 +256,11 @@ func main() {
 		}
 
 		//PreAlert for Isha
-		if config.Prayers.Isha == true {
-			if config.Options.Alert == true {
-				if pai == CurrentTime {
-					cli.SetVolume(config.Volume.Default)
-					cli.Notify(" ")
-					time.Sleep(15 * time.Second)
-				}
+		if config.Prayers.Isha && config.Options.Alert {
+			if pai == CurrentTime {
+				cli.SetVolume(config.Volume.Default)
+				cli.Notify(" ")
+				time.Sleep(15 * time.Second)
 			}
 		}
 
