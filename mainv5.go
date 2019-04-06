@@ -268,7 +268,7 @@ func main() {
 
 //LookupHomeIP Scans internet for Google Cast System
 func LookupHomeIP() []*GoogleHomeInfo {
-
+	
 	entriesCh := make(chan *mdns.ServiceEntry, 2)
 	results := []*GoogleHomeInfo{}
 
