@@ -189,7 +189,7 @@ func main() {
 		pai := fmt.Sprintf(pi.Format("15:04"))
 
 		//Checks if its time for Fajir
-		if Y.Data.Timings.F == CurrentTime && config.Options.Alert {
+		if Y.Data.Timings.F == CurrentTime && config.Prayers.Fajir {
 			cli.SetVolume(config.Volume.Fajir)
 			cli.Play(config.Audio.Fajir)
 			time.Sleep(4 * time.Minute)
@@ -388,7 +388,7 @@ func MethodV() {
 	case 12:
 		fmt.Println(Using + " Union Organization islamic de France")
 	case 13:
-		fmt.Println(Using + " Diyanet Ä°ÅŸleri BaÅŸkanlÄ±ÄŸÄ±, Turkey")
+		fmt.Println(Using + " Diyanet İşleri Başkanlığı, Turkey")
 	case 14:
 		fmt.Println(Using + " Spiritual Administration of Muslims of Russia")
 	default:
