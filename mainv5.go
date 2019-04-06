@@ -152,7 +152,7 @@ func main() {
 	//Call Athan API
 	Y := ACal()
 
-	for range time.Tick(time.Second * 15) {
+	for range time.Tick(time.Second * 10) {
 		//Grab Updated Config Files
 		config, _ := LoadConfig("config.json")
 
@@ -198,12 +198,10 @@ func main() {
 		}
 
 		//PreAlert for Duhur
-		if config.Prayers.Duhur && config.Options.Alert {
-			if pds == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
-			}
+		if config.Prayers.Duhur && config.Options.Alert && pds == CurrentTime {
+			cli.SetVolume(config.Volume.Default)
+			cli.Notify(" ")
+			time.Sleep(15 * time.Second)
 		}
 
 		//Checks if its time for Duhur
@@ -222,12 +220,10 @@ func main() {
 		}
 
 		//PreAlert for Asr
-		if config.Prayers.Asr && config.Options.Alert {
-			if pas == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
-			}
+		if config.Prayers.Asr && config.Options.Alert && pas == CurrentTime {
+			cli.SetVolume(config.Volume.Default)
+			cli.Notify(" ")
+			time.Sleep(15 * time.Second)
 		}
 
 		//Checks if its time for Asr
@@ -238,12 +234,10 @@ func main() {
 		}
 
 		//PreAlert for Magrib
-		if config.Prayers.Magrib && config.Options.Alert {
-			if pam == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
-			}
+		if config.Prayers.Magrib && config.Options.Alert && pam == CurrentTime {
+			cli.SetVolume(config.Volume.Default)
+			cli.Notify(" ")
+			time.Sleep(15 * time.Second)
 		}
 
 		//Checks if its time for Magrib
@@ -254,12 +248,10 @@ func main() {
 		}
 
 		//PreAlert for Isha
-		if config.Prayers.Isha && config.Options.Alert {
-			if pai == CurrentTime {
-				cli.SetVolume(config.Volume.Default)
-				cli.Notify(" ")
-				time.Sleep(15 * time.Second)
-			}
+		if config.Prayers.Isha && config.Options.Alert && pai == CurrentTime {
+			cli.SetVolume(config.Volume.Default)
+			cli.Notify(" ")
+			time.Sleep(15 * time.Second)
 		}
 
 		//Checks if time for Isha
@@ -282,8 +274,7 @@ func LookupHomeIP() []*GoogleHomeInfo {
 	go func() {
 		for entry := range entriesCh {
 			if strings.Contains(entry.Name, "Cast") {
-				fmt.Printf("[INFO] ServiceEntry Group Cast detected: [%s:%d]", entry.AddrV4, entry.Port)
-				fmt.Println(" ")
+				fmt.Printf("[INFO] ServiceEntry Group Cast detected: [%s:%d] \n", entry.AddrV4, entry.Port)
 				CPort = entry.Port
 				CIP = fmt.Sprintf(entry.AddrV4.String())
 			}
