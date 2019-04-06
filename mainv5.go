@@ -102,16 +102,18 @@ type GoogleHomeInfo struct {
 	Port int
 }
 
-var CPort int
-var CIP string
+var (
+	CPort int
+	CIP   string
+)
 
 //Split API
 const (
-	MainAPI    string = "http://api.aladhan.com/v1/timingsByCity?city="
-	CountryAPI string = "&country="
-	StateAPI   string = "&state="
-	MethodAPI  string = "&method="
-	SchoolAPI  string = "&school="
+	MainAPI    = "http://api.aladhan.com/v1/timingsByCity?city="
+	CountryAPI = "&country="
+	StateAPI   = "&state="
+	MethodAPI  = "&method="
+	SchoolAPI  = "&school="
 )
 
 var config Config
@@ -120,10 +122,11 @@ var cli *googlehome.Config
 func main() {
 	LookupHomeIP()
 	var err error
+
 	//Connect to Json file for settings and paramaters
 	config, err = LoadConfig("config.json")
 	if err != nil {
-		defer Check()
+		CheckOFF()
 		log.Fatal("Error importing config.json file", err)
 	}
 
@@ -136,18 +139,18 @@ func main() {
 	})
 
 	if err != nil {
-		defer Check()
+		CheckOFF()
 		panic(err)
-	} else {
-		Checks()
-		// Sets to device to default volume
-		cli.SetVolume(config.Volume.Default)
-		//Echos to device to tell if users its Connected
-		if config.Options.Connection == true {
-			cli.Notify("Successfully Connected.")
-		}
-		ConnectedTo()
 	}
+
+	CheckOn()
+	// Sets to device to default volume
+	cli.SetVolume(config.Volume.Default)
+	//Echos to device to tell if users its Connected
+	if config.Options.Connection == true {
+		cli.Notify("Successfully Connected.")
+	}
+	ConnectedTo()
 
 	//Call Athan API
 	Y := ACal()
@@ -171,7 +174,7 @@ func main() {
 		//Duhur
 		pd, _ := time.Parse("15:04", Y.Data.Timings.D)
 		pd = pd.Add(time.Minute * time.Duration(-15))
-		pds := fmt.Sprintf(pd.Format("15:04"))
+		pad := fmt.Sprintf(pd.Format("15:04"))
 
 		//Asr
 		pa, _ := time.Parse("15:04", Y.Data.Timings.A)
@@ -196,7 +199,7 @@ func main() {
 		}
 
 		//PreAlert for Duhur
-		if config.Prayers.Duhur && config.Options.Alert && pds == CurrentTime {
+		if config.Prayers.Duhur && config.Options.Alert && pad == CurrentTime {
 			cli.SetVolume(config.Volume.Default)
 			cli.Notify(" ")
 			time.Sleep(15 * time.Second)
@@ -292,8 +295,8 @@ func LookupHomeIP() []*GoogleHomeInfo {
 
 //ACal API Function
 func ACal() Athan {
-	var Meth = strconv.Itoa(config.Calculation.Method)
-	var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth + SchoolAPI + config.Calculation.School
+	var MethConv = strconv.Itoa(config.Calculation.Method)
+	var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + MethConv + SchoolAPI + config.Calculation.School
 
 	//var AthanAPI = MainAPI + config.Location.City + CountryAPI + config.Location.Country + StateAPI + config.Location.State + MethodAPI + Meth + SchoolAPI + config.Calculation.School
 	FormatAPI := fmt.Sprintf(AthanAPI)
@@ -305,7 +308,7 @@ func ACal() Athan {
 	// Use the clients GET method to create and execute the request
 	resp, err := client.Get(FormatAPI, nil)
 	if err != nil {
-		defer Check()
+		defer CheckOFF()
 		panic(err)
 	}
 
@@ -353,11 +356,11 @@ func ConnectedTo() {
 	fmt.Println("Default Volume Set at", config.Volume.Default)
 
 	//Calculation Method
-	MethodV()
+	CalcMethodPrint()
 }
 
-//MethodV Find out what Calculation method is being used
-func MethodV() {
+//CalcMethodPrint Find out what Calculation method is being used
+func CalcMethodPrint() {
 	config, _ := LoadConfig("config.json")
 
 	var Using string = "Using Calculation Method: "
@@ -396,8 +399,7 @@ func MethodV() {
 	}
 }
 
-func Checks() {
-
+func CheckOn() {
 	var err = os.Remove("Status.txt")
 	if err != nil {
 		fmt.Println(err)
@@ -412,8 +414,7 @@ func Checks() {
 	defer file.Close()
 }
 
-func Check() {
-
+func CheckOFF() {
 	file, _ := os.Create("Status.txt")
 
 	s, err := file.WriteString("OFF")
