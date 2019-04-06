@@ -139,8 +139,8 @@ func main() {
 		defer Check()
 		panic(err)
 	} else {
-		// Sets to device to default volume
 		Checks()
+		// Sets to device to default volume
 		cli.SetVolume(config.Volume.Default)
 		//Echos to device to tell if users its Connected
 		if config.Options.Connection == true {
@@ -206,15 +206,15 @@ func main() {
 		if Y.Data.Timings.D == CurrentTime && config.Prayers.Duhur {
 			cli.SetVolume(config.Volume.Duhur)
 			cli.Play(config.Audio.Athan)
-			time.Sleep(4 * time.Minute)
-		}
+			time.Sleep(6 * time.Minute)
 
-		//Checks if the day is Friday
-		if config.Options.Recite && CurrentDay == "Friday" {
-			//cli.Notify("I will begin reciting Quran.")
-			time.Sleep(5 * time.Second)
-			cli.Play(config.Audio.Recite)
-			time.Sleep(30 * time.Minute)
+			//Checks if the day is Friday
+			if config.Options.Recite && CurrentDay == "Friday" {
+				//cli.Notify("I will begin reciting Quran.")
+				time.Sleep(5 * time.Second)
+				cli.Play(config.Audio.Recite)
+				time.Sleep(30 * time.Minute)
+			}
 		}
 
 		//PreAlert for Asr
@@ -354,7 +354,6 @@ func ConnectedTo() {
 
 	//Calculation Method
 	MethodV()
-
 }
 
 //MethodV Find out what Calculation method is being used
