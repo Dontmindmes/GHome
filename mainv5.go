@@ -388,7 +388,7 @@ func MethodV() {
 	case 12:
 		fmt.Println(Using + " Union Organization islamic de France")
 	case 13:
-		fmt.Println(Using + " Diyanet İşleri Başkanlığı, Turkey")
+		fmt.Println(Using + " Diyanet Ä°ÅŸleri BaÅŸkanlÄ±ÄŸÄ±, Turkey")
 	case 14:
 		fmt.Println(Using + " Spiritual Administration of Muslims of Russia")
 	default:
