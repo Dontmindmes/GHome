@@ -165,10 +165,8 @@ func main() {
 		CurrentTime := fmt.Sprint(t.In(location).Format("15:04"))
 
 		//Check if friday
-		day := time.Now().Weekday()
+		day := t.In(location).Weekday()
 		CurrentDay := fmt.Sprint(day)
-
-		//Beta Pre Salat Alert
 
 		//Duhur
 		pd, _ := time.Parse("15:04", Y.Data.Timings.D)
