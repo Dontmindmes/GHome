@@ -214,13 +214,11 @@ func main() {
 		}
 
 		//Checks if the day is Friday
-		if config.Options.Recite == true {
-			if CurrentDay == "Friday" {
-				//cli.Notify("I will begin reciting Quran.")
-				time.Sleep(5 * time.Second)
-				cli.Play(config.Audio.Recite)
-				time.Sleep(30 * time.Minute)
-			}
+		if config.Options.Recite && CurrentDay == "Friday" {
+			//cli.Notify("I will begin reciting Quran.")
+			time.Sleep(5 * time.Second)
+			cli.Play(config.Audio.Recite)
+			time.Sleep(30 * time.Minute)
 		}
 
 		//PreAlert for Asr
