@@ -4,18 +4,15 @@
       "Language":"en",
       "Accent":"us"
    },
-   "connection":{  
-      "IP":"192.168.1.6",
-      "Port":42038
-   },
    "location":{  
-      "City":"Chino",
+      "City":"Anaheim",
       "State":"CA",
       "Country":"US",
       "TimeZone":"America/Los_Angeles"
    },
    "calculation":{  
-      "Method":2
+      "Method":2,
+      "School":"Shafi"
    },
    "prayers":{  
       "Fajir":false,
@@ -25,19 +22,23 @@
       "Isha":true
    },
    "audio":{  
-      "Athan":"https://www.127.0.0.1/Audio/Quba.mp3",
-      "Recite":"https://www.127.0.0.1/Audio/kahaf.mp3"
+      "Athan":"https://www.iioc.live/Audio/Quba.mp3",
+      "Fajir": "https://cdn.aladhan.com/audio/adhans/a1.mp3",
+      "Recite":"https://www.iioc.live/Audio/kahaf.mp3"
    },
    "volume":{  
-      "Connection":true,
-      "Default":0.58,
+      
+      "Default":0.42,
       "Fajir":0.06,
-      "Duhur":0.51,
-      "Asr":0.51,
-      "Magrib":0.51,
-      "Isha":0.51
+      "Duhur":0.45,
+      "Asr":0.45,
+      "Magrib":0.45,
+      "Isha":0.45
    },
-   "options":{  
-      "Recite":true
+   "options":{ 
+     "Connection": false, 
+     "Recite":true,
+     "Alert":true
+     
    }
 }
